@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PennyLog - Expense Tracker App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            background: rgba(106, 17, 203, 0.9);
+            z-index: 100;
+            border-radius: 10px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 32px;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        nav ul li a:hover {
+            color: #ffdd40;
+        }
+        
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 0;
+            flex-wrap: wrap;
+        }
+        
+        .hero-content {
+            flex: 1;
+            min-width: 300px;
+            color: white;
+            padding-right: 30px;
+        }
+        
+        .hero-content h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero-content p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background-color: #ffdd40;
+            color: #333;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            background-color: #ffd52a;
+        }
+        
+        .app-preview {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .phone-mockup {
+            width: 300px;
+            height: 600px;
+            background: white;
+            border-radius: 40px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .phone-screen {
+            background: #f8f9fa;
+            height: 100%;
+            border-radius: 30px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .screen-header {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .wallet-balance {
+            background: white;
+            margin: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .wallet-balance h3 {
+            color: #6a11cb;
+            margin-bottom: 10px;
+        }
+        
+        .wallet-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .month-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px;
+        }
+        
+        .earning, .spending {
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .earning {
+            background: rgba(37, 117, 252, 0.1);
+            color: #2575fc;
+        }
+        
+        .spending {
+            background: rgba(255, 77, 79, 0.1);
+            color: #ff4d4f;
+        }
+        
+        .transactions {
+            margin: 15px;
+            flex-grow: 1;
+        }
+        
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+        }
+        
+        .positive {
+            color: #2575fc;
+        }
+        
+        .negative {
+            color: #ff4d4f;
+        }
+        
+        .features {
+            background: white;
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            color: #333;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .feature-card p {
+            color: #666;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 80px 0;
+            text-align: center;
+            color: white;
+        }
+        
+        .download-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        .download-section p {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+        
+        footer {
+            background: #1a1a2e;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 20px;
+            color: #ffdd40;
+        }
+        
+        .footer-bottom {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-content {
+                padding-right: 0;
+                margin-bottom: 40px;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+                justify-content: center;
+            }
+            
+            .app-preview {
+                margin-top: 40px;
+            }
+            
+            nav ul li {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <span>PennyLog</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#download">Download</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Track Every Penny with PennyLog</h1>
+                <p>PennyLog helps you manage your finances, track your spending, and achieve your financial goals with our intuitive expense tracker app.</p>
+                <a href="#download" class="download-btn"><i class="fas fa-download"></i> Download App</a>
+            </div>
+            <div class="app-preview">
+                <div class="phone-mockup">
+                    <div class="phone-screen">
+                        <div class="screen-header">
+                            <h2>My Transactions</h2>
+                        </div>
+                        <div class="wallet-balance">
+                            <h3>My Wallet</h3>
+                            <div class="wallet-amount">₹ 105,000</div>
+                        </div>
+                        <div class="month-summary">
+                            <div class="earning">
+                                <h4>Earning</h4>
+                                <p>₹ 9,000</p>
+                            </div>
+                            <div class="spending">
+                                <h4>Spending</h4>
+                                <p>- ₹ 4,000</p>
+                            </div>
+                        </div>
+                        <div class="transactions">
+                            <div class="transaction">
+                                <div class="transaction-details">
+                                    <strong>stock market</strong>
+                                    <span>Finance</span>
+                                </div>
+                                <div class="transaction-amount positive">+ ₹ 9,000</div>
+                            </div>
+                            <div class="transaction">
+                                <div class="transaction-details">
+                                    <strong>room rent</strong>
+                                    <span>Housing</span>
+                                </div>
+                                <div class="transaction-amount negative">- ₹ 4,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to take control of your finances in one place</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Expense Tracking</h3>
+                    <p>Track your spending by category and see where your money goes each month with intuitive charts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Financial Goals</h3>
+                    <p>Set and track financial goals like saving for college fees or your dream vacation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3>Monthly Reports</h3>
+                    <p>Get detailed reports of your income and expenses to better understand your financial habits.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="download" class="download-section">
+        <div class="container">
+            <h2>Download PennyLog Now</h2>
+            <p>Available for both iOS and Android devices. Start tracking your expenses today and take control of your financial future.</p>
+            <a href="pennyLog.apk" class="download-btn" download="pennyLog.apk"><i class="fas fa-download"></i> Download App</a>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PennyLog</h3>
+                <p>The ultimate expense tracker app for managing your personal finances.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <p><a href="#" style="color: white;">Home</a></p>
+                <p><a href="#features" style="color: white;">Features</a></p>
+                <p><a href="#download" style="color: white;">Download</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p><i class="fas fa-envelope"></i> support@pennylog.com</p>
+                <p><i class="fas fa-phone"></i> +91 9876543210</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 PennyLog. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('nav a, .footer-section a');
+            
+            for (const link of navLinks) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            }
+            
+            // Download button functionality
+            const downloadButton = document.querySelector('.download-section .download-btn');
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Create a temporary anchor element to trigger the download
+                    const link = document.createElement('a');
+                    link.href = 'pennyLog.apk';
+                    link.download = 'pennyLog.apk';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show a confirmation message
+                    alert('Thank you for downloading PennyLog! Your download should start shortly.');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
