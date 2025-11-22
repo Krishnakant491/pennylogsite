@@ -1,72 +1,56 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-        buildDiscarder(logRotator(daysToKeepStr: '30'))
-    }
-
-    parameters {
-        string(name: 'IMAGE_NAME', defaultValue: 'pockaw-app', description: 'Docker image name')
-        string(name: 'DOCKER_REGISTRY', defaultValue: '', description: 'Optional Docker registry (e.g. registry.hub.docker.com/username)')
-        booleanParam(name: 'PUSH_IMAGE', defaultValue: false, description: 'Push built image to registry')
-    }
-
     environment {
-        // Image tag includes build number; registry prefix is optional
-        DOCKER_IMAGE = "${params.DOCKER_REGISTRY ? params.DOCKER_REGISTRY + '/' : ''}${params.IMAGE_NAME}:${env.BRANCH_NAME ?: 'branch'}-${env.BUILD_NUMBER}"
-        // SONAR_TOKEN: provide a Jenkins Secret Text credential with id 'SONAR_TOKEN' if you want Sonar scans
-        SONAR_TOKEN = credentials('SONAR_TOKEN')
+        DOCKERHUB_USER = "krishnakant491"
+        IMAGE_NAME    = "pennylogsite"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                git branch: 'master', url: 'https://github.com/Krishnakant491/pennylogsite.git'
             }
         }
 
-        stage('Build Docker') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker --version || true'
-                sh "docker build -t ${env.DOCKER_IMAGE} ."
+                sh "docker build -t \$DOCKERHUB_USER/\$IMAGE_NAME:latest ."
             }
         }
 
-        stage('Push Image') {
-            when {
-                expression { return params.PUSH_IMAGE }
-            }
+        stage('Login to DockerHub') {
             steps {
-                // This expects two Jenkins credentials (username/password) with ids 'DOCKERHUB_USER' and 'DOCKERHUB_PASS'
-                withCredentials([string(credentialsId: 'DOCKERHUB_USER', variable: 'DH_USER'), string(credentialsId: 'DOCKERHUB_PASS', variable: 'DH_PASS')]) {
-                    sh 'echo $DH_PASS | docker login -u $DH_USER --password-stdin ${params.DOCKER_REGISTRY ?: ""}'
-                    sh "docker push ${env.DOCKER_IMAGE}"
+                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASS')]) {
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKERHUB_USER --password-stdin"
                 }
             }
         }
 
-        stage('SonarQube') {
-            when {
-                expression { return env.SONAR_HOST_URL }
-            }
+        stage('Push to DockerHub') {
             steps {
-                // Requires `sonar-scanner` installed on agent, or use SonarQube plugin (adapt as needed)
-                sh "sonar-scanner -Dsonar.projectKey=${env.JOB_NAME} -Dsonar.sources=. -Dsonar.host.url=${env.SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}"
+                sh "docker push \$DOCKERHUB_USER/\$IMAGE_NAME:latest"
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                sh '''
+                docker stop pennylogsite || true
+                docker rm pennylogsite  || true
+                docker pull \$DOCKERHUB_USER/\$IMAGE_NAME:latest
+                docker run -d --name pennylogsite -p 80:80 \$DOCKERHUB_USER/\$IMAGE_NAME:latest
+                '''
             }
         }
     }
 
     post {
-        always {
-            archiveArtifacts artifacts: 'index.html', fingerprint: true
-            cleanWs()
-        }
         success {
-            echo "Build ${env.BUILD_NUMBER} succeeded. Image: ${env.DOCKER_IMAGE}"
+            echo "✅ Deployment successful!"
         }
         failure {
-            echo "Build failed. See console output for details."
+            echo "❌ Build or deployment failed."
         }
     }
 }
